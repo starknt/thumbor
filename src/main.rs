@@ -21,6 +21,7 @@ use bytes::Bytes;
 use engine::{Engine, Photon};
 use lru::LruCache;
 use pb::*;
+use percent_encoding::{percent_encode, NON_ALPHANUMERIC};
 use serde::Deserialize;
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
@@ -63,6 +64,7 @@ async fn main() -> Result<()> {
     };
 
     tracing::debug!("listening on {}", addr);
+    print_test_url("https://img.xjh.me/random_img.php?return=302&time=13145");
 
     axum::serve(listener, app).await.unwrap();
 
@@ -119,4 +121,15 @@ async fn retrieve_image(url: &str, cache: Cache) -> Result<Bytes> {
     };
 
     Ok(data)
+}
+
+fn print_test_url(url: &str) {
+    use std::borrow::Borrow;
+    let spec1 = Spec::new_resize(500, 800, resize::SampleFilter::CatmullRom);
+    let spec2 = Spec::new_watermark(20, 20, 1);
+    let spec3 = Spec::new_filter(filter::Filter::Marine);
+    let image_spec = ImageSpec::new(vec![spec1, spec2, spec3]);
+    let s: String = image_spec.borrow().into();
+    let test_image = percent_encode(url.as_bytes(), NON_ALPHANUMERIC).to_string();
+    println!("test url: http://localhost:3000/image/{}/{}", s, test_image);
 }
