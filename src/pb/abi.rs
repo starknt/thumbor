@@ -190,8 +190,26 @@ pub struct Watermark {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DrawText {
+    #[prost(string, tag = "1")]
+    pub text: ::prost::alloc::string::String,
+    #[prost(uint32, tag = "2")]
+    pub x: u32,
+    #[prost(uint32, tag = "3")]
+    pub y: u32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct OilEffect {
+    #[prost(int32, tag = "1")]
+    pub radius: i32,
+    #[prost(float, tag = "2")]
+    pub intensity: f32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Spec {
-    #[prost(oneof = "spec::Data", tags = "1, 2, 3, 4, 5, 6, 7")]
+    #[prost(oneof = "spec::Data", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
     pub data: ::core::option::Option<spec::Data>,
 }
 /// Nested message and enum types in `Spec`.
@@ -213,5 +231,9 @@ pub mod spec {
         Filter(super::Filter),
         #[prost(message, tag = "7")]
         Watermark(super::Watermark),
+        #[prost(message, tag = "8")]
+        Text(super::DrawText),
+        #[prost(message, tag = "9")]
+        Oil(super::OilEffect),
     }
 }

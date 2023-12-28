@@ -88,6 +88,21 @@ impl Spec {
             data: Some(spec::Data::Watermark(Watermark { x, y, alpha: a })),
         }
     }
+
+    pub fn new_draw_text(text: String, x: u32, y: u32) -> Self {
+        Self {
+            data: Some(spec::Data::Text(DrawText { text, x, y })),
+        }
+    }
+
+    pub fn new_oil() -> Self {
+        Self {
+            data: Some(spec::Data::Oil(OilEffect {
+                radius: 2,
+                intensity: 50.0,
+            })),
+        }
+    }
 }
 
 #[cfg(test)]

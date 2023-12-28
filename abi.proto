@@ -59,6 +59,17 @@ message Watermark {
   uint32 alpha = 3;
 }
 
+message DrawText {
+  string text = 1;
+  uint32 x = 2;
+  uint32 y = 3;
+}
+
+message OilEffect {
+  int32 radius = 1;
+  float intensity = 2;
+}
+
 message Spec {
   oneof data {
     Resize resize = 1;
@@ -68,5 +79,7 @@ message Spec {
     Contrast contrast = 5;
     Filter filter = 6;
     Watermark watermark = 7;
+    DrawText text = 8;
+    OilEffect oil = 9;
   }
 }

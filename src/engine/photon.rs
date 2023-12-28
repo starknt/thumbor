@@ -1,6 +1,9 @@
 use std::io::Cursor;
 
-use crate::pb::{filter, resize, spec, Contrast, Crop, Filter, Fliph, Flipv, Resize, Watermark};
+use crate::pb::{
+    filter, resize, spec, Contrast, Crop, DrawText, Filter, Fliph, Flipv, OilEffect, Resize,
+    Watermark,
+};
 use anyhow::Result;
 use bytes::Bytes;
 use image::{DynamicImage, ImageBuffer, ImageOutputFormat};
@@ -8,6 +11,7 @@ use lazy_static::lazy_static;
 use photon_rs::{
     effects, filters, multiple,
     native::open_image_from_bytes,
+    text,
     transform::{self},
     PhotonImage,
 };
@@ -43,6 +47,8 @@ impl Engine for Photon {
                 Some(spec::Data::Fliph(ref v)) => self.transform(v),
                 Some(spec::Data::Flipv(ref v)) => self.transform(v),
                 Some(spec::Data::Watermark(ref v)) => self.transform(v),
+                Some(spec::Data::Text(ref v)) => self.transform(v),
+                Some(spec::Data::Oil(ref v)) => self.transform(v),
                 _ => {}
             }
         }
@@ -107,6 +113,18 @@ impl SpecTransformer<&Filter> for Photon {
             Some(f) => filters::filter(&mut self.0, f.to_str().unwrap()),
             _ => {}
         }
+    }
+}
+
+impl SpecTransformer<&DrawText> for Photon {
+    fn transform(&mut self, op: &DrawText) {
+        text::draw_text(&mut self.0, op.text.as_str(), op.x, op.y)
+    }
+}
+
+impl SpecTransformer<&OilEffect> for Photon {
+    fn transform(&mut self, op: &OilEffect) {
+        effects::oil(&mut self.0, op.radius, op.intensity as f64)
     }
 }
 
