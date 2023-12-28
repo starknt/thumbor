@@ -1,18 +1,26 @@
-use std::io::{BufWriter, Cursor};
+use std::io::Cursor;
 
+use crate::pb::{filter, resize, spec, Contrast, Crop, Filter, Fliph, Flipv, Resize, Watermark};
 use anyhow::Result;
 use bytes::Bytes;
 use image::{DynamicImage, ImageBuffer, ImageOutputFormat};
+use lazy_static::lazy_static;
 use photon_rs::{
-    effects, filters,
+    effects, filters, multiple,
     native::open_image_from_bytes,
     transform::{self},
     PhotonImage,
 };
 
-use crate::pb::{filter, resize, spec, Contrast, Crop, Filter, Fliph, Flipv, Resize};
-
 use super::{Engine, SpecTransformer};
+
+lazy_static! {
+    static ref WATERMARK: PhotonImage = {
+        let data = include_bytes!("../../rust-logo.png");
+        let watermark = open_image_from_bytes(data).unwrap();
+        transform::resize(&watermark, 64, 64, transform::SamplingFilter::Nearest)
+    };
+}
 
 pub struct Photon(PhotonImage);
 
@@ -34,7 +42,7 @@ impl Engine for Photon {
                 Some(spec::Data::Filter(ref v)) => self.transform(v),
                 Some(spec::Data::Fliph(ref v)) => self.transform(v),
                 Some(spec::Data::Flipv(ref v)) => self.transform(v),
-                Some(spec::Data::Watermark(ref v)) => {}
+                Some(spec::Data::Watermark(ref v)) => self.transform(v),
                 _ => {}
             }
         }
@@ -57,6 +65,12 @@ impl SpecTransformer<&Flipv> for Photon {
     }
 }
 
+impl SpecTransformer<&Watermark> for Photon {
+    fn transform(&mut self, op: &Watermark) {
+        multiple::watermark(&mut self.0, &WATERMARK, op.x, op.y);
+    }
+}
+
 impl SpecTransformer<&Crop> for Photon {
     fn transform(&mut self, op: &Crop) {
         let img = transform::crop(&mut self.0, op.x1, op.y1, op.x2, op.y2);
@@ -68,14 +82,12 @@ impl SpecTransformer<&Resize> for Photon {
     fn transform(&mut self, op: &Resize) {
         let img = match resize::ResizeType::from_i32(op.rtype).unwrap() {
             resize::ResizeType::Normal => transform::resize(
-                &mut self.0,
+                &self.0,
                 op.width,
                 op.height,
                 resize::SampleFilter::from_i32(op.filter).unwrap().into(),
             ),
-            resize::ResizeType::SeamCarve => {
-                transform::seam_carve(&mut self.0, op.width, op.height)
-            }
+            resize::ResizeType::SeamCarve => transform::seam_carve(&self.0, op.width, op.height),
         };
 
         self.0 = img;
