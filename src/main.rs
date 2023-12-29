@@ -8,11 +8,11 @@ use std::{
 
 use anyhow::Result;
 use axum::{
-    extract::Path,
+    extract::{Path, State},
     http::{HeaderMap, HeaderValue, StatusCode},
     response::Html,
     routing::get,
-    Extension, Router,
+    Router,
 };
 
 mod engine;
@@ -24,8 +24,6 @@ use pb::*;
 use percent_encoding::{percent_encode, NON_ALPHANUMERIC};
 use serde::Deserialize;
 use tokio::sync::Mutex;
-use tower::ServiceBuilder;
-use tower_http::add_extension::AddExtensionLayer;
 use tracing::info;
 
 async fn index_handler() -> Html<&'static str> {
@@ -50,11 +48,12 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .route("/", get(index_handler))
         .route("/image/:spec/:url", get(generate))
-        .layer(
-            ServiceBuilder::new()
-                .layer(AddExtensionLayer::new(cache))
-                .into_inner(),
-        );
+        .with_state(cache);
+    // .layer(
+    //     ServiceBuilder::new()
+    //         .layer(AddExtensionLayer::new(cache))
+    //         .into_inner(),
+    // );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let mut fd = listenfd::ListenFd::from_env();
@@ -75,7 +74,7 @@ async fn main() -> Result<()> {
 
 async fn generate(
     Path(Params { spec, url }): Path<Params>,
-    Extension(cache): Extension<Cache>,
+    State(cache): State<Cache>,
 ) -> Result<(HeaderMap, Vec<u8>), StatusCode> {
     let url = percent_encoding::percent_decode_str(&url).decode_utf8_lossy();
     let spec: ImageSpec = spec
