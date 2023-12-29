@@ -208,8 +208,14 @@ pub struct OilEffect {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PixelizeEffect {
+    #[prost(int32, tag = "1")]
+    pub size: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Spec {
-    #[prost(oneof = "spec::Data", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
+    #[prost(oneof = "spec::Data", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
     pub data: ::core::option::Option<spec::Data>,
 }
 /// Nested message and enum types in `Spec`.
@@ -235,5 +241,7 @@ pub mod spec {
         Text(super::DrawText),
         #[prost(message, tag = "9")]
         Oil(super::OilEffect),
+        #[prost(message, tag = "10")]
+        Pixelize(super::PixelizeEffect),
     }
 }

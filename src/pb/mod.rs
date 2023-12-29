@@ -103,6 +103,12 @@ impl Spec {
             })),
         }
     }
+
+    pub fn new_pixelize(size: i32) -> Self {
+        Self {
+            data: Some(spec::Data::Pixelize(PixelizeEffect { size })),
+        }
+    }
 }
 
 #[cfg(test)]

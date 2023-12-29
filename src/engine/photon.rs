@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
 use crate::pb::{
-    filter, resize, spec, Contrast, Crop, DrawText, Filter, Fliph, Flipv, OilEffect, Resize,
-    Watermark,
+    filter, resize, spec, Contrast, Crop, DrawText, Filter, Fliph, Flipv, OilEffect,
+    PixelizeEffect, Resize, Watermark,
 };
 use anyhow::Result;
 use bytes::Bytes;
@@ -49,6 +49,7 @@ impl Engine for Photon {
                 Some(spec::Data::Watermark(ref v)) => self.transform(v),
                 Some(spec::Data::Text(ref v)) => self.transform(v),
                 Some(spec::Data::Oil(ref v)) => self.transform(v),
+                Some(spec::Data::Pixelize(ref v)) => self.transform(v),
                 _ => {}
             }
         }
@@ -125,6 +126,12 @@ impl SpecTransformer<&DrawText> for Photon {
 impl SpecTransformer<&OilEffect> for Photon {
     fn transform(&mut self, op: &OilEffect) {
         effects::oil(&mut self.0, op.radius, op.intensity as f64)
+    }
+}
+
+impl SpecTransformer<&PixelizeEffect> for Photon {
+    fn transform(&mut self, op: &PixelizeEffect) {
+        effects::pixelize(&mut self.0, op.size)
     }
 }
 

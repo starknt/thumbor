@@ -66,6 +66,7 @@ async fn main() -> Result<()> {
     tracing::debug!("listening on {}", addr);
     print_test_url("https://img.xjh.me/random_img.php?return=302&time=13145");
     print_test_url2("https://img.xjh.me/random_img.php?return=302&time=13145");
+    print_test_url3("https://img.xjh.me/random_img.php?return=302&time=13145");
 
     axum::serve(listener, app).await.unwrap();
 
@@ -140,6 +141,18 @@ fn print_test_url2(url: &str) {
     let spec1 = Spec::new_oil();
     let spec2 = Spec::new_watermark(20, 20, 1);
     let spec3 = Spec::new_filter(filter::Filter::Marine);
+    let spec4 = Spec::new_draw_text("Hello World".to_string(), 40, 40);
+    let image_spec = ImageSpec::new(vec![spec1, spec2, spec3, spec4]);
+    let s: String = image_spec.borrow().into();
+    let test_image = percent_encode(url.as_bytes(), NON_ALPHANUMERIC).to_string();
+    println!("test url: http://localhost:3000/image/{}/{}", s, test_image);
+}
+
+fn print_test_url3(url: &str) {
+    use std::borrow::Borrow;
+    let spec1 = Spec::new_pixelize(2);
+    let spec2 = Spec::new_watermark(20, 20, 1);
+    let spec3 = Spec::new_filter(filter::Filter::Oceanic);
     let spec4 = Spec::new_draw_text("Hello World".to_string(), 40, 40);
     let image_spec = ImageSpec::new(vec![spec1, spec2, spec3, spec4]);
     let s: String = image_spec.borrow().into();

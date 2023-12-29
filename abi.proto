@@ -70,6 +70,10 @@ message OilEffect {
   float intensity = 2;
 }
 
+message PixelizeEffect {
+  int32 size = 1;
+}
+
 message Spec {
   oneof data {
     Resize resize = 1;
@@ -81,5 +85,6 @@ message Spec {
     Watermark watermark = 7;
     DrawText text = 8;
     OilEffect oil = 9;
+    PixelizeEffect pixelize = 10;
   }
 }
